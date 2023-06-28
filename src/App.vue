@@ -1,30 +1,67 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
+
+<script>
+import axios from 'axios';
+import AppHeader from './components/AppHeader.vue';
+import AppPokemon from './components/AppPokemon.vue';
+import { store } from './store.js';
+import AppSearchbar from './components/AppSearchbar.vue';
+export default {
+  components: {
+    AppHeader,
+    AppPokemon,
+    AppSearchbar,
+  },
+  data() {
+    return {
+      store,
+    }
+  },
+  mounted() {
+    this.getPokemon()
+  },
+  methods: {
+    getPokemon() {
+      let myUrl = store.ApiUrl;
+      console.log(store.searchText)
+      if (store.searchText !== '') {
+        myUrl += `&q[name]=${store.searchText}`
+      }
+      if (store.typeValue !== '') {
+        if (store.searchText !== '') {
+          myUrl += '&'
+        }
+        else {
+          myUrl += '?'
+        }
+
+
+        myUrl += `&q[type1]=${store.typeValue} `
+      }
+
+      axios.get(myUrl).then((response) => {
+        store.pokemonList = response.data.docs;
+        store.loading = false
+      });
+    },
+    searchPokemon() {
+      console.log(store.searchText)
+      this.getPokemon();
+    }
+  },
+
+}
 </script>
 
-<template>
+
+<template lang="">
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <AppSearchbar @search="searchPokemon" />
+   <AppHeader />
+   <AppPokemon />
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+
+<style lang="scss">
+@use './styles/generals.scss' as *;
 </style>
